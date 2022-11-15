@@ -1,0 +1,17 @@
+body{
+	font-family: Calibri,Verdana, Geneva, sans-serif;
+	font-size: 11pt;
+	background:#41566E;
+	color:#EEC;
+}
+
+canvas{
+	float:right;
+}
+/*body {
+	font-family: Calibri,Verdana, Geneva, sans-serif;
+	font-size: 11pt;
+	background: #FFF;
+	color:: #41566E;
+	;
+}*/

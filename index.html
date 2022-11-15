@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/webgl.css">
+    <script type="text/javascript" src="js/Coord2D.js"></script>
+    <script type="text/javascript" src="js/Colors.js"></script>
+    <script type="text/javascript" src="js/Squelette.js"></script>
+    <script type="text/javascript" src="js/Displayer.js"></script>
+    <script type="text/javascript" src="js/Animation.js"></script>
+    <script type="text/javascript" src="js/Sequences.js"></script>
+</head>
+<body>
+    <div id="display"></div>
+    <div id="msgArea">
+
+        <p>&Agrave; propos de cette version</p>
+        <p>
+            Un squelette est représenté par un graphe orienté
+            <ul>
+                <li>
+                    dont les sommets représentent les articulations (joint), caractérisées par
+                    <ul>
+                        <li> position (Coord2D) dans le modèle</li>
+                        <li> position dans le dispositif d'affichage, et </li>
+                        <li> l'identifiant de l'élément (créé lors de l'initialisation du graphe et utilisé dans la définition d'animations).</li>
+                    </ul>
+                </li>
+                <li>les arêtes orientées (sens fk) représentent les os (bones) et sont caractérisées par</li>
+                <ul>
+                    <li>une référence from (première articulation)</li>
+                    <li>une référence to (deuxième articulation)</li>
+                    <li>
+                        alpha =  l'angle (<b>i</b>, <b>fromto</b>) où <b>i</b> est le premier vecteur du repère canonique du plan et <b>fromto</b> est le vecteur des points <code>from</code> &agrave; <code>to</code>
+                    </li>
+                </ul>
+            </ul>
+        </p>
+        <p>
+            Remarques diverses:
+            <ul>
+                <li>
+                    Contrairement à d'autres logiques usuelles, chaque sommet est représenté dans deux systèmes de coordonnées différents:
+                    le système de coordonnées du modèle et le système de coordonnées des dispositifs. Le squelette est initialisé avec
+                    les coordonnées modèle. Au premier affichage les coordonnées dans le système de coordonnées des dispositifs sont calculées et sauvegardées.
+                    Les interactions modifient ensuite directement ces coordonnées (mais pas leurs homologues modèles).
+                </li>
+                <li>
+                    Le lien entre les attributs (alpha, ro) et les deux versions modèle et dispositif de (from,to) est bidirectionnel par nature mais pour simplifier, dans cette version, (alpha, ro)
+                    ne sont utilisées que dans les interactions/affichage.
+                    (alpha, ro) ne sont donc exprimées que dans les systèmes de coordonnées des dispositifs de pointage et d'affichage.
+                </li>
+                <li>A propos de la propagation des mouvements: pour alléger le modèle, seuls les liens fk sont explicites. Mais, au besoin, fk et ik sans représentables sans trop de modifications.</li>
+                <li>L'interacteur est à écrire mais les gestionnaires d'évènements utiles pour l'écrire sont déjà écrits et configurés pour faciliter son écriture. </li>
+                <li>Pour l'interacteur, une fonction pick est déjà écrite. Elle retourne <ul><li>le sommet du modèle qui se trouve sous le pointeur lorsqu'il existe</li><li>undefined dans les autres cas.</li></ul></li>
+                <li>Dans cette version, la fonction pick n'a aucun effet de bord. </li>
+            </ul>
+    </div>
+
+    <script type="text/javascript">
+        let displayer;
+        let arti = undefined;
+
+
+        function initComputeAndRender() {
+            let display = document.getElementById("display");
+            displayer = new Displayer(display);
+            arti = new Squelette("p");
+            let dimension = arti.getModelBox();
+            displayer.setModelSpace(dimension.minX, dimension.minY, dimension.maxX, dimension.maxY);
+            let msgArea = document.getElementById("msgArea");
+            let interactor = new Interactor(arti, displayer, msgArea);
+
+            arti.draw(displayer);
+        }
+
+        window.onload = initComputeAndRender;
+
+    </script>
+</body>
+</html>
