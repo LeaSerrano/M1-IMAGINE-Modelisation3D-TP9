@@ -22,6 +22,8 @@ class Interactor {
 
     constructor(p_chain, p_displayer, p_htmlElement) {
         this.displayer = p_displayer;
+        this.skeleton = p_chain;
+        this.state = "IDLE";
  
         p_displayer
             .getCanvas()
@@ -44,7 +46,7 @@ class Interactor {
                 "wheel",
                 this.follow(this, this.handleWheel)
             );
-    }
+    } 
 
     follow(that, callback) {
         return function (e) {
@@ -55,25 +57,53 @@ class Interactor {
     handleWheel(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        console.log("handle wheel "+ e.deltaY );
+        //console.log("handle wheel "+ e.deltaY );
+
+        let pickS = this.skeleton.pick(this.displayer, e);
+
+        if (pickS =! undefined) {
+            //wheel
+        }
     }
 
     handlePress(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        console.log("handle press " + e.offsetX + " " + e.offsetY);
+        //console.log("handle press " + e.offsetX + " " + e.offsetY);
+
+        let pickS = this.skeleton.pick(this.displayer, e);
+
+        if (pickS =! undefined) {
+            //T6 : même item
+            //T7
+            //T8 : un item différent
+            
+            //penser à changer la couleur
+        }
+        else {
+            //T1
+        }
+
     }
 
     handleMove(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        console.log("handle move " + e.offsetX + " " + e.offsetY);
+        //console.log("handle move " + e.offsetX + " " + e.offsetY);
+
+        let pickS = this.skeleton.pick(this.displayer, e);
+
+        if (pickS != undefined) {
+            //T2
+            //T3
+        }
+        
     }
 
     handleUpLeave(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        console.log("handle up and leave " + e.offsetX + " " + e.offsetY);
+        //console.log("handle up and leave " + e.offsetX + " " + e.offsetY);
     }
 }
 
@@ -178,8 +208,8 @@ class Displayer {
     // mc - { mc.x, mc.y } coordonnées de la souris dans le canvas
     // ce un chainElement affiché par un ghost dans le display
     intersect(ce, mc) {
-        let x = ce.getGhost().x,
-            y = ce.getGhost().y,
+        let x = ce.p.c.x,
+            y = ce.p.c.y,
             r = this.pointSize + this.epsilon;
         let b =
             mc.x <= x + r && mc.x >= x - r && mc.y <= y + r && mc.y >= y - r;
