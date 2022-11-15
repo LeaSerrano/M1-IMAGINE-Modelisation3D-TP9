@@ -72,6 +72,28 @@
             let interactor = new Interactor(arti, displayer, msgArea);
 
             arti.draw(displayer);
+
+            
+            let sequence = s3;
+            let a = new Animation(sequence.length - 1, 1);
+            let frame;
+            let step = 0;
+
+            a.nextStep = function(t) {
+                frame = sequence[step];
+                arti.joints[frame[1]].p.c.x = frame[2];
+                arti.joints[frame[1]].p.c.y = frame[3];
+                arti.draw(displayer);
+                step++;
+            }
+
+            a.lastStep = function(t) {
+                arti.initModel();
+                arti.draw(displayer);
+            }
+                
+
+            a.run();
         }
 
         window.onload = initComputeAndRender;

@@ -21,6 +21,9 @@ class Joint {
 
     move(p_e, p_previousLocation) {
         //todo
+        /*let save = p_previousLocation;
+        p_previousLocation = p_e;
+        p_e = save;*/
    }
 
 }
@@ -37,6 +40,8 @@ class Bone {
     // ça devrait couaquer mais je suppose que, pour le moment les couacs s'annulent.
     ro;
     alpha;
+
+    //l'angle va de 0 à 2pi modulo 2pi
 
     constructor(from, to) {
         this.from = from;
