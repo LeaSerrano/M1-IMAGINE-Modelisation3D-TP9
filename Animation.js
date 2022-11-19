@@ -4,6 +4,10 @@ class Animation {
     start = 0;
     previousTimeStep = 0;
 
+    firstStep = undefined;
+    nextStep = undefined;
+    lastStep = undefined;
+
     constructor(maxStep = 20, frameDuration = 400) {
         this.frameDuration = frameDuration;
         this.maxStep = maxStep;
@@ -24,7 +28,6 @@ class Animation {
             let that = this;
             let delta = t - this.previousTimeStep;
             if (delta >= this.frameDuration) {
-                //console.log(this.step + "-> delta = " + delta);
                 this.nextStep(t);
                 this.previousTimeStep = t;
                 this.step++;

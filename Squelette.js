@@ -20,20 +20,8 @@ class Joint {
     }
 
     move(p_e, p_previousLocation) {
-        let delta = new Coord2D(p_e.offsetX - p_previousLocation.x, p_e.offsetY - p_previousLocation.y);
-
-        this.getGhost().x += delta.x;
-        this.getGhost().y += delta.y;
-    }
-
-    changeAlpha(up) {
-        //todo up est un booléen qui dépend de l'évènement provenant de la souris (molette vers le haut ou vers le bas)
-        console.log("Todo: implémenter la méthode changeAlpha de Joint");
-    }
-
-    getGhost() {
-        return this.p.c;
-    }
+        //todo
+   }
 
 }
 
@@ -49,6 +37,8 @@ class Bone {
     // ça devrait couaquer mais je suppose que, pour le moment les couacs s'annulent.
     ro;
     alpha;
+
+    //l'angle va de 0 à 2pi modulo 2pi
 
     constructor(from, to) {
         this.from = from;
