@@ -1,10 +1,31 @@
-class Interactor {
+class Move {
+    rank;
+    idj;
+    x;
+    y;
+    constructor(joint, moveId) {
+        this.rank = moveId;
+        this.idj = joint.idj;
+        this.x = joint.p.c.x;
+        this.y = joint.p.c.y;
+    }
+    toString() {
+        let a1 = Math.round(this.x * 100) / 100,
+        a2 = Math.round(this.y * 100) / 100;
+       
+        return "[" + this.rank + "," + this.idj + "," +a1+ "," + a2 + "],<br \>";
+    }
+}
 
-    constructor(p_chain, p_displayer) {
+class Interactor {
+//todo: à écrire
+
+    constructor(p_chain, p_displayer, p_htmlElement) {
         this.displayer = p_displayer;
-        this.chain = p_chain;
-        this.state = "idle";
-        this.needRefreshing = false;
+        this.skeleton = p_chain;
+        this.hmtl = p_htmlElement;
+        this.state = "IDLE";
+        this.lastPick = undefined;
  
         p_displayer
             .getCanvas()
@@ -27,7 +48,7 @@ class Interactor {
                 "wheel",
                 this.follow(this, this.handleWheel)
             );
-    }
+    } 
 
     follow(that, callback) {
         return function (e) {
@@ -38,78 +59,124 @@ class Interactor {
     handleWheel(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        if (this.state === "selected") {
-            this.selection.changeAlpha(e.deltaY > 0);
-            this.chain.draw(this.displayer, undefined, false);
+        //console.log("handle wheel "+ e.deltaY );
+
+        let pickS = this.skeleton.pick(this.displayer, e);
+        console.log(this.skeleton);
+
+        if (pickS != undefined) {
+            //wheel
+            if (this.state == "SELECTED") {
+                this.state = "WHEEL";
+                this.lastPick = pickS;
+            }
+
+            if (this.state == "WHEEL") {
+
+                let x = this.skeleton.bones[pickS.idj-1].to.p.c.x;
+                let y = this.skeleton.bones[pickS.idj-1].to.p.c.y;
+                let cx = this.skeleton.bones[pickS.idj-1].from.p.c.x;
+                let cy = this.skeleton.bones[pickS.idj-1].from.p.c.y;
+
+                var radians = (Math.PI / 180) * (e.deltaY * -0.01)*Math.PI/2,
+                cos = Math.cos(radians),
+                sin = Math.sin(radians),
+                nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
+                ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+
+                this.skeleton.bones[pickS.idj-1].to.p.c.x = nx;
+                this.skeleton.bones[pickS.idj-1].to.p.c.y = ny;
+
+                this.lastPick = pickS;
+
+                this.skeleton.draw(this.displayer);
+            }
         }
     }
 
     handlePress(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        let selection = this.chain.pick(this.displayer, e);
-        this.needRefreshing = false;
-        this.previousLocation = { x: e.offsetX, y: e.offsetY };
+        //console.log("handle press " + e.offsetX + " " + e.offsetY);
 
-        if (this.state === "idle" && selection) {
-            this.state = "down";
-            this.changeSelection(selection);
-            this.needRefreshing = true;
-        } else if (this.state === "selected") {
-            if (selection === undefined) {
-                this.state = "idle";
-                this.changeSelection(undefined);
-                this.needRefreshing = true;
-            } else {
-                this.state = "down";
-                if (selection !== this.selection) {
-                    this.changeSelection(selection);
-                    this.needRefreshing = true;
-                }
+        let pickS = this.skeleton.pick(this.displayer, e);
+
+        if (pickS =! undefined) {
+            //T1
+            if (this.state == "IDLE") {
+                this.state = "STARTMOVE";
+                this.lastPick = pickS;
             }
-        }
-        if (this.needRefreshing)
-            this.chain.draw(this.displayer, undefined, false);
-    }
 
-    //fait l'hypothèse que p_selection est différent de this.selection
-    changeSelection(p_selection) {
-        if (this.selection) {
-            this.selection.selected = false;
+            //T6 : même item
+            if (this.state == "SELECTED" && this.lastPick == pickS) {
+                this.state = "STARTMOVE";
+                this.lastPick = pickS;
+            }
+
+            //T7
+            if (this.state == "WHEEL") {
+                this.state = "IDLE";
+                this.lastPick = pickS;
+            }
+
+            //T8 : un item différent
+            if (this.state == "SELECTED" && this.lastPick != pickS) {
+                this.state = "STARTMOVE";
+                this.lastPick = pickS;
+            }
+            
         }
-        this.selection = p_selection;
-        if (p_selection) this.selection.selected = true;
+
     }
 
     handleMove(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        this.needRefreshing = false;
- 
-        if (this.state === "down") {
-            this.state = "move";
+        //console.log("handle move " + e.offsetX + " " + e.offsetY);
+
+        let pickS = this.skeleton.pick(this.displayer, e);
+
+        if (pickS != undefined) {
+            //T2
+            if (this.state == "STARTMOVE") {
+                this.state = "MOVE";
+                this.lastPick = pickS;
+            }
+
+            //T3
+            if (this.state == "MOVE") {
+                this.skeleton.joints[pickS.idj].p.c.x = e.offsetX;
+                this.skeleton.joints[pickS.idj].p.c.y = e.offsetY;
+
+                this.lastPick = pickS;
+
+                this.skeleton.draw(this.displayer);
+
+            }
         }
-        if (this.state === "move") {
-            this.selection.move(e, this.previousLocation);
-            this.previousLocation = { x: e.offsetX, y: e.offsetY };
-            this.needRefreshing = true;
-        }
-        if (this.needRefreshing)
-            this.chain.draw(this.displayer, undefined, false);
+        
     }
 
     handleUpLeave(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        this.needRefreshing = false;
+        //console.log("handle up and leave " + e.offsetX + " " + e.offsetY);
 
-        if (this.state === "move") {
-            this.state = "selected";
-        } else if (this.state === "down") {
-            this.state = "selected";
-        }
-        if (this.needRefreshing)
-            this.chain.draw(this.displayer, undefined, false);
+        let pickS = this.skeleton.pick(this.displayer, e);
+
+        if (pickS != undefined) {
+            //T4
+            if (this.state == "MOVE") {
+                this.state = "SELECTED";//"IDLE";
+                this.lastPick = pickS;
+            }
+
+            if (this.state == "STARTMOVE") {
+                this.state = "SELECTED";
+                this.lastPick = pickS;
+            }
+        }   
     }
 }
 
@@ -214,8 +281,8 @@ class Displayer {
     // mc - { mc.x, mc.y } coordonnées de la souris dans le canvas
     // ce un chainElement affiché par un ghost dans le display
     intersect(ce, mc) {
-        let x = ce.getGhost().x,
-            y = ce.getGhost().y,
+        let x = ce.p.c.x,
+            y = ce.p.c.y,
             r = this.pointSize + this.epsilon;
         let b =
             mc.x <= x + r && mc.x >= x - r && mc.y <= y + r && mc.y >= y - r;

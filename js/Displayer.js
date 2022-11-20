@@ -90,9 +90,18 @@ class Interactor {
             this.state = "move";
         }
         if (this.state === "move") {
-            this.selection.move(e, this.previousLocation);
+            //Question 1
+            /*this.selection.move(e, this.previousLocation);
             this.previousLocation = { x: e.offsetX, y: e.offsetY };
-            this.needRefreshing = true;
+            this.needRefreshing = true;*/
+
+            for (let i = this.selection.idj; i < this.selection.idj+4; i++) {
+                this.selection.move(e, this.previousLocation);
+                this.previousLocation = { x: e.offsetX, y: e.offsetY };
+                this.needRefreshing = true;
+
+                console.log(this.selection.idj);
+            }
         }
         if (this.needRefreshing)
             this.chain.draw(this.displayer, undefined, false);
