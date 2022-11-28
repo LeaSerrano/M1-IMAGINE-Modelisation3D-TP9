@@ -24,34 +24,37 @@ class Joint {
 
         this.getGhost().x += delta.x;
         this.getGhost().y += delta.y;
+
     }
 
     changeAlpha(up) {
         //todo up est un booléen qui dépend de l'évènement provenant de la souris (molette vers le haut ou vers le bas)
         //console.log("Todo: implémenter la méthode changeAlpha de Joint");
 
-        let x = this.bones[0].to.p.c.x;
-        let y = this.bones[0].to.p.c.y;
-        let cx = this.bones[0].from.p.c.x;
-        let cy = this.bones[0].from.p.c.y;
+        if (this.bones[0] != undefined) {
+            let x = this.bones[0].to.p.c.x;
+            let y = this.bones[0].to.p.c.y;
+            let cx = this.bones[0].from.p.c.x;
+            let cy = this.bones[0].from.p.c.y;
 
-        let radians;
+            let radians;
 
-        if (up == true) {
-            radians = (Math.PI / 180) * Math.PI/2;
+            if (up == true) {
+                radians = (Math.PI / 180) * Math.PI/2;
+            }
+            else {
+                radians = (Math.PI / 180) * (-1 * Math.PI/2);
+            }
+
+
+            let cos = Math.cos(radians);
+            let sin = Math.sin(radians);
+
+            let delta = new Coord2D((cos * (x - cx)) + (sin * (y - cy)) + cx, (cos * (y - cy)) - (sin * (x - cx)) + cy);
+
+            this.bones[0].to.p.c.x = delta.x;
+            this.bones[0].to.p.c.y = delta.y;
         }
-        else {
-            radians = (Math.PI / 180) * (-1 * Math.PI/2);
-        }
-
-        
-        let cos = Math.cos(radians);
-        let sin = Math.sin(radians);
-
-        let delta = new Coord2D((cos * (x - cx)) + (sin * (y - cy)) + cx, (cos * (y - cy)) - (sin * (x - cx)) + cy);
-
-        this.bones[0].to.p.c.x = delta.x;
-        this.bones[0].to.p.c.y = delta.y;
     }
 
     getGhost() {

@@ -64,6 +64,8 @@ class Interactor {
                 this.state = "down";
                 if (selection !== this.selection) {
                     this.changeSelection(selection);
+                    //Question 4
+                    //this.deplacementDistant(e);
                     this.needRefreshing = true;
                 }
             }
@@ -81,6 +83,74 @@ class Interactor {
         if (p_selection) this.selection.selected = true;
     }
 
+    deplacementLibre(e) {
+        this.selection.move(e, this.previousLocation);
+        this.previousLocation = { x: e.offsetX, y: e.offsetY };
+        this.needRefreshing = true;
+    }
+
+    returnChild(select) {
+        if (select.bones[0] != undefined) {
+            return select.bones[0].to;
+        }
+    }
+
+    loopSnakeLike(select, i, distTab, force) {
+        while (select != undefined && force != 0) {
+            let vectFromToApres = new Coord2D(select.from.p.c.x - select.to.p.c.x, select.from.p.c.y - select.to.p.c.y);
+           
+            let lengthVect = vectFromToApres.norme();
+            vectFromToApres.x /= lengthVect;
+            vectFromToApres.y /= lengthVect;
+
+            if (select.to.p.c.x > select.from.p.c.x) {
+                vectFromToApres.x *= -1;
+            }
+
+            if (select.to.p.c.y > select.from.p.c.y) {
+                vectFromToApres.y *= -1;
+            }
+
+            console.log(vectFromToApres, select.to.p.c, select.from.p.c);
+            select.to.p.c = new Coord2D(vectFromToApres.x* distTab[i] + select.from.p.c.x, vectFromToApres.y * distTab[i] + select.from.p.c.y);
+            select = select.to.bones[0];
+            i++;
+            force--;
+        }
+    }
+
+    loopDistFromToAvant(select) {
+        let distTab = [];
+        while (select != undefined) {
+            distTab.push(Math.sqrt(Math.pow(select.from.p.c.x - select.to.p.c.x, 2) + Math.pow(select.from.p.c.y - select.to.p.c.y, 2)));
+            select = select.to.bones[0];
+        }
+
+        return distTab;
+    }
+
+    deplacementSnakeLike(e, force) {
+        let distTab = this.loopDistFromToAvant(this.selection.bones[0]);
+
+        this.selection.move(e, this.previousLocation);
+        this.previousLocation = { x: e.offsetX, y: e.offsetY };
+
+        this.loopSnakeLike(this.selection.bones[0], 0, distTab, force);
+    }
+
+    deplacementDistant(e) {
+        if (this.selection.bones[0] != undefined) {
+            let save = this.selection.bones[0].to.p.c;
+            this.selection.bones[0].to.p.c = this.selection.bones[0].from.p.c;
+            this.selection.bones[0].from.p.c = save;
+            
+            this.selection.move(e, this.previousLocation);
+            this.previousLocation = { x: e.offsetX, y: e.offsetY };
+            this.needRefreshing = true;
+
+        }
+    }
+
     handleMove(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -91,17 +161,14 @@ class Interactor {
         }
         if (this.state === "move") {
             //Question 1
-            /*this.selection.move(e, this.previousLocation);
-            this.previousLocation = { x: e.offsetX, y: e.offsetY };
-            this.needRefreshing = true;*/
+            //this.deplacementLibre(e);
 
-            for (let i = this.selection.idj; i < this.selection.idj+4; i++) {
-                this.selection.move(e, this.previousLocation);
-                this.previousLocation = { x: e.offsetX, y: e.offsetY };
-                this.needRefreshing = true;
+            //Question 2
+            this.deplacementSnakeLike(e, 2);
+            this.needRefreshing = true;
 
-                console.log(this.selection.idj);
-            }
+            //Question 4 (voir handlePress)
+
         }
         if (this.needRefreshing)
             this.chain.draw(this.displayer, undefined, false);
